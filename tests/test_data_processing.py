@@ -1,6 +1,6 @@
 import unittest
 import pandas as pd
-from src.data_processing import clean_data
+from src.data_processing import clean_data, create_data_from_entry
 
 
 SMALL_TEST_DATA = [
@@ -30,25 +30,70 @@ class CleanDataTests(unittest.TestCase):
 
     def test_that_GIVEN_data_THEN_the_index_is_set_to_time(self):
         # Then:
-        assert self.result.index.dtype_str == 'datetime64[ns]'
-        assert self.result.index.name == "Time"
+        self.assertEquals(self.result.index.dtype_str, 'datetime64[ns]')
+        self.assertEquals(self.result.index.name,"Time")
 
     def test_that_GIVEN_data_there_is_no_0_columns(self):
         # Then:
-        assert 0 not in self.result.columns
+        self.assertTrue(0 not in self.result.columns)
 
     def test_that_GIVEN_data_THEN_there_are_100_columns(self):
         # Then:
-        assert len(self.result.columns) == 100
-
+        self.assertEquals(len(self.result.columns), 100)
 
     def test_that_GIVEN_data_set_with_duplicate_rows_THEN_the_returned_dataframe_has_no_duplicate_rows(
             self):
         # Then:
         duplicates = self.result.duplicated()
-        assert all(duplicates == False)
+        self.assertFalse(all(duplicates))
 
 
+class CreateDataFromEntryTests(unittest.TestCase):
 
+    def test_that_GIVEN_cleaned_data_WHEN_create_data_from_array_is_called_THEN_the_first_entry_has_the_same_time_stamp(
+            self):
+        # Given:
+        data = pd.DataFrame(
+            data=SMALL_TEST_DATA, columns=list(range(0, 100 + 1))
+        )
+        data = clean_data(data)
 
+        # When:
+        result = create_data_from_entry(0, data)
 
+        # Then:
+        expected_timestamp = data.iloc[0].name.to_datetime64()
+        result_timestamp = result.iloc[0].name.to_datetime64()
+        self.assertEquals(result_timestamp, expected_timestamp)
+
+    def test_that_GIVEN_cleaned_data_WHEN_create_data_from_array_is_called_THEN_the_first_entry_has_the_same_value(
+            self):
+        # Given:
+        data = pd.DataFrame(
+            data=SMALL_TEST_DATA, columns=list(range(0, 100 + 1))
+        )
+        data = clean_data(data)
+
+        # When:
+        result = create_data_from_entry(0, data)
+
+        # Then:
+        expected_value = 4.5185524610000005
+        result_value = result.iloc[0, 0]
+        self.assertEquals(expected_value, result_value)
+
+    def test_that_GIVEN_cleaned_data_WHEN_create_data_from_array_is_called_THEN_the_second_entry_is_correct(
+            self):
+        # Given:
+        data = pd.DataFrame(
+            data=SMALL_TEST_DATA, columns=list(range(0, 100 + 1))
+        )
+        data = clean_data(data)
+
+        # When:
+        result = create_data_from_entry(0, data)
+
+        # Then:
+        expected_value = 4.4503286189999995
+        result_value = result.iloc[1, 0]
+        self.assertEquals(expected_value, result_value)
