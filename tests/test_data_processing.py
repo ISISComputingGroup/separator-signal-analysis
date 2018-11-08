@@ -1,6 +1,7 @@
+import datetime
 import unittest
 import pandas as pd
-from src.data_processing import clean_data, create_data_from_entry
+from src.data_processing import clean_data, create_data_from_entry, create_rolling_averages
 
 
 SMALL_TEST_DATA = [
@@ -62,8 +63,8 @@ class CreateDataFromEntryTests(unittest.TestCase):
         result = create_data_from_entry(0, data)
 
         # Then:
-        expected_timestamp = data.iloc[0]["Time"].to_datetime64()
-        result_timestamp = result.iloc[0]["Time"].to_datetime64()
+        expected_timestamp = data.loc[0, "Time"].to_datetime64()
+        result_timestamp = result.loc[0, "Time"].to_datetime64()
         self.assertEquals(result_timestamp, expected_timestamp)
 
     def test_that_GIVEN_cleaned_data_WHEN_create_data_from_array_is_called_THEN_the_first_entry_has_the_same_value(
@@ -82,18 +83,84 @@ class CreateDataFromEntryTests(unittest.TestCase):
         result_value = result.iloc[0, 0]
         self.assertEquals(expected_value, result_value)
 
-    def test_that_GIVEN_cleaned_data_WHEN_create_data_from_array_is_called_THEN_the_second_entry_is_correct(
+    def test_that_GIVEN_row_with_timestamp_WHEN_create_data_from_array_is_called_THEN_the_first_entry_is_correct(
+            self):
+        # Given:
+        columns = ["Time"]
+        columns.extend(list(range(1, 91)))
+
+        data = pd.DataFrame(
+            data=[[
+                pd.Timestamp('2018-09-21 16:56:48.930999994'), 4.4968738570000006,
+                4.5153644310000001, 4.4997430839999994, 4.523972112,
+                4.4927294179999997, 4.5142486205000001, 4.5144080219999996,
+                4.5555336090000003, 4.5054815379999997, 4.5440567010000006,
+                4.5274789450000004, 4.5203058775000002, 4.5073943559999998,
+                4.5110605904999996, 4.511219992, 4.5199870745000004,
+                4.5174366505000005, 4.5352896185000002, 4.5027717124999995,
+                4.5093071739999999, 4.5336956035, 4.5158426355000003,
+                4.5266819375000003, 4.5032499169999998, 4.5109011890000001,
+                4.5131328100000001, 4.5268413390000006, 4.5051627349999999,
+                4.5164802415, 4.4997430840000003, 4.5109011890000001,
+                4.5045251289999992, 4.5454913144999995, 4.4954392434999999,
+                4.519030665499999, 4.5002212885000006, 4.517596052,
+                4.5073943560000007, 4.5191900670000003, 4.4938452284999997,
+                4.5249285209999996, 4.4955986449999994, 4.5341738080000002,
+                4.5115387949999999, 4.5105823859999994, 4.5166396429999995,
+                4.5160020369999998, 4.5156832339999999, 4.5265225359999999,
+                4.502612311, 4.5332173989999998, 4.4944828345000003, 4.513451613,
+                4.5242909149999999, 4.5172772490000002, 4.5303481720000001,
+                4.5223780970000007, 4.5116981964999994, 4.5247691195000002,
+                4.5214216880000002, 4.5129734084999997, 4.5164802415,
+                4.5040469244999999, 4.5132922115000005, 4.5096259769999998,
+                4.5429408905000006, 4.5105823860000003, 4.5257255285000006,
+                4.5102635830000004, 4.5056409394999992, 4.4970332585000001,
+                4.5263631344999995, 4.5006994929999999, 4.532579793,
+                4.5032499169999998, 4.5282759524999996, 4.5163208400000006,
+                4.5349708155000004, 4.5078725604999992, 4.4860345549999998,
+                4.5037281215, 4.5193494684999997, 4.5212622864999998,
+                4.5399122620000005, 4.5102635830000004, 4.5065973484999997,
+                4.5301887705000006, 4.5207840820000005, 4.5160020369999998,
+                4.4933670239999994]],
+            columns=columns
+        )
+
+        # When:
+        result = create_data_from_entry(0, data)
+
+        # Then:
+        expected_value = 4.4968738570000006
+        result_value = result.iloc[0, 0]
+        self.assertEquals(expected_value, result_value)
+
+    def test_that_GIVEN_cleaned_data_WHEN_create_data_from_array_is_called_THEN_the_first_entry_is_not_a_time(
             self):
         # Given:
         data = pd.DataFrame(
             data=SMALL_TEST_DATA, columns=list(range(0, 100 + 1))
         )
         data = clean_data(data)
+        data.drop(0, inplace=True)
 
         # When:
         result = create_data_from_entry(0, data)
 
         # Then:
-        expected_value = 4.4503286189999995
-        result_value = result.iloc[1, 0]
+        expected_value = 4.662332613999999
+        result_value = result.iloc[0, 0]
         self.assertEquals(expected_value, result_value)
+
+
+class RollingAveragesTests(unittest.TestCase):
+
+    def test_that_GIVEN_a_row_THEN_an_array_of_rolling_averages_is_produced(self):
+        # Given:
+        timestamp = datetime.datetime.utcnow()
+        row = pd.Series([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, timestamp],
+                        index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "Time"])
+
+        # Then:
+        result = create_rolling_averages(row, increment=2)
+        expected = [timestamp, 2, 3, 4, 5, 6, 7, 8, 9]
+
+        self.assertEquals(result, expected)

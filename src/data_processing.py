@@ -32,14 +32,13 @@ def create_data_from_entry(row_number, raw_dataframe):
     """
 
     row = raw_dataframe.iloc[row_number]
-    row_data = list(row.values)
-
     time_delta = np.timedelta64(1, 'ms')
 
     new_time_stamps = []
-    previous_timestamp = row["Time"].to_datetime64()
+    previous_timestamp = row.loc["Time"].to_datetime64()
+    row = row.drop("Time")
 
-    for i in range(0, 100):
+    for i in range(row.size):
         if i == 0:
             new_time_stamps.append(previous_timestamp)
         else:
@@ -47,8 +46,9 @@ def create_data_from_entry(row_number, raw_dataframe):
             new_time_stamps.append(new_time_stamp)
             previous_timestamp = new_time_stamp
 
-    dataframe = pd.DataFrame(data=zip(new_time_stamps, row_data))
+    dataframe = pd.DataFrame(data=zip(new_time_stamps, row.values))
     dataframe = convert_time(dataframe)
+    dataframe.columns = ["Value", "Time"]
     return dataframe
 
 
@@ -86,3 +86,20 @@ def load_data(nrows=None):
     data["Time"] = pd.to_datetime(data["Time"])
 
     return data
+
+
+def create_rolling_averages(row, increment=10):
+    """
+    Creates an array of rolling averages
+    :param row:
+    Return:
+        dataframe: Pandas dataframe of rolling averages and time stamp for each
+    """
+
+    averages = []
+    averages.append(row["Time"])
+    row = row.drop("Time")
+    for i in range(0, row.size - increment):
+        averages.append(np.mean([row[i], row[i + increment]]))
+
+    return averages
