@@ -13,7 +13,7 @@ def clean_data(dataframe):
     Returns:
         dataframe: Dataframe with converted columns and duplicates removed.
     """
-    dataframe = set_index_to_time(dataframe)
+    dataframe = convert_time(dataframe)
     dataframe = dataframe.drop_duplicates(list(range(1, 100 + 1)))
     return dataframe
 
@@ -31,13 +31,13 @@ def create_data_from_entry(row_number, raw_dataframe):
             of a row.
     """
 
-    row = raw_dataframe.iloc[row_number, :]
-    row_data = row.values.tolist()
+    row = raw_dataframe.iloc[row_number]
+    row_data = list(row.values)
 
     time_delta = np.timedelta64(1, 'ms')
 
     new_time_stamps = []
-    previous_timestamp = row.name.to_datetime64()
+    previous_timestamp = row["Time"].to_datetime64()
 
     for i in range(0, 100):
         if i == 0:
@@ -48,11 +48,11 @@ def create_data_from_entry(row_number, raw_dataframe):
             previous_timestamp = new_time_stamp
 
     dataframe = pd.DataFrame(data=zip(new_time_stamps, row_data))
-    dataframe = set_index_to_time(dataframe)
+    dataframe = convert_time(dataframe)
     return dataframe
 
 
-def set_index_to_time(dataframe):
+def convert_time(dataframe):
     """
     Converts the 0 column to a time and sets the index to time.
 
@@ -65,5 +65,24 @@ def set_index_to_time(dataframe):
 
     dataframe["Time"] = pd.to_datetime(dataframe[0], unit="s")
     dataframe = dataframe.drop(0, 1)
-    dataframe = dataframe.set_index("Time")
     return dataframe
+
+
+def load_data(nrows=None):
+    """
+    Loads the data and turns the time into timestamps.
+
+    Args:
+        nrows (int, optional): Number of rows to import.
+
+    Returns:
+        data: A pandas dataframe of the import data.
+    """
+    if nrows is not None:
+        data = pd.read_csv("data\\processed\\cleaned_data.csv", nrows=nrows)
+    else:
+        data = pd.read_csv("data\\processed\\cleaned_data.csv")
+
+    data["Time"] = pd.to_datetime(data["Time"])
+
+    return data

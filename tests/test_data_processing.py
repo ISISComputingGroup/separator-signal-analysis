@@ -28,10 +28,10 @@ class CleanDataTests(unittest.TestCase):
         # When:
         self.result = clean_data(self.data)
 
-    def test_that_GIVEN_data_THEN_the_index_is_set_to_time(self):
+    def test_that_GIVEN_data_THEN_the_time_is_converted_to_a_datetime_format(self):
         # Then:
-        self.assertEquals(self.result.index.dtype_str, 'datetime64[ns]')
-        self.assertEquals(self.result.index.name,"Time")
+        self.assertEquals(self.result["Time"].dtype, 'datetime64[ns]')
+
 
     def test_that_GIVEN_data_there_is_no_0_columns(self):
         # Then:
@@ -39,7 +39,7 @@ class CleanDataTests(unittest.TestCase):
 
     def test_that_GIVEN_data_THEN_there_are_100_columns(self):
         # Then:
-        self.assertEquals(len(self.result.columns), 100)
+        self.assertEquals(len(self.result.columns), 101)
 
     def test_that_GIVEN_data_set_with_duplicate_rows_THEN_the_returned_dataframe_has_no_duplicate_rows(
             self):
@@ -62,8 +62,8 @@ class CreateDataFromEntryTests(unittest.TestCase):
         result = create_data_from_entry(0, data)
 
         # Then:
-        expected_timestamp = data.iloc[0].name.to_datetime64()
-        result_timestamp = result.iloc[0].name.to_datetime64()
+        expected_timestamp = data.iloc[0]["Time"].to_datetime64()
+        result_timestamp = result.iloc[0]["Time"].to_datetime64()
         self.assertEquals(result_timestamp, expected_timestamp)
 
     def test_that_GIVEN_cleaned_data_WHEN_create_data_from_array_is_called_THEN_the_first_entry_has_the_same_value(
