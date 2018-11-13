@@ -15,6 +15,7 @@ def clean_data(dataframe):
     """
     dataframe = convert_time(dataframe)
     dataframe = dataframe.drop_duplicates(list(range(1, 100 + 1)))
+    dataframe = dataframe.reset_index(drop=True)
     return dataframe
 
 
@@ -32,23 +33,16 @@ def create_data_from_entry(row_number, raw_dataframe):
     """
 
     row = raw_dataframe.iloc[row_number]
-    time_delta = np.timedelta64(1, 'ms')
+    base_timestamp = row.loc["Datetime"].to_datetime64()
+    time_delta = (raw_dataframe.loc[row_number + 1, "Datetime"].to_datetime64()
+                  - base_timestamp) / 100
 
-    new_time_stamps = []
-    previous_timestamp = row.loc["Time"].to_datetime64()
-    row = row.drop("Time")
+    new_time_stamps = [np.datetime64(base_timestamp + i * time_delta) for i in range(0, row.size + 1)]
 
-    for i in range(row.size):
-        if i == 0:
-            new_time_stamps.append(previous_timestamp)
-        else:
-            new_time_stamp = previous_timestamp + time_delta
-            new_time_stamps.append(new_time_stamp)
-            previous_timestamp = new_time_stamp
-
+    row = row.drop("Datetime")
     dataframe = pd.DataFrame(data=zip(new_time_stamps, row.values))
-    dataframe = convert_time(dataframe)
-    dataframe.columns = ["Value", "Time"]
+    dataframe.columns = ["Datetime", "Value"]
+    dataframe = dataframe.sort_index(axis=1)
     return dataframe
 
 
@@ -63,7 +57,7 @@ def convert_time(dataframe):
         dataframe: The converted dataframe
     """
 
-    dataframe["Time"] = pd.to_datetime(dataframe[0], unit="s")
+    dataframe["Datetime"] = pd.to_datetime(dataframe[0], unit="s")
     dataframe = dataframe.drop(0, 1)
     return dataframe
 
@@ -97,9 +91,113 @@ def create_rolling_averages(row, increment=10):
     """
 
     averages = []
-    averages.append(row["Time"])
-    row = row.drop("Time")
+    averages.append(row["Datetime"])
+    row = row.drop("Datetime")
     for i in range(0, row.size - increment):
         averages.append(np.mean([row[i], row[i + increment]]))
 
     return averages
+
+
+def clean_camonitored_data(data):
+    """
+    Cleans file produced from camonitoring a PV.
+
+    Args:
+        data (pandas Dataframe): Pandas Dataframe to be parsed.
+    Returns:
+        cleaned_dataframe (Dataframe): Cleaned dataframe
+    """
+    columns = ["PV name", "Date", "Time", "NELM"]
+    columns.extend(list(range(1, 100 + 1)))
+    data.columns = columns
+
+    data["Datetime"] = pd.to_datetime(data["Date"] + ' ' + data["Time"])
+
+    new_columns = ["Datetime"]
+    new_columns.extend(list(range(1, 100 + 1)))
+    cleaned_dataframe = data[new_columns]
+
+    return cleaned_dataframe
+
+
+def unstable_seconds(dataframe, mean, high_limit=1.0, low_limit=1.0):
+    """
+    Finds the number of seconds values are outside a stability range.
+
+    Args:
+        dataframe:
+        mean (float): Mean value.
+        high_limit (float): High limit of stability.
+        low_limit (float): Low limit of stability.
+
+    Returns:
+        float: Number of unstable seconds.
+    """
+    try:
+        unstable_readings = dataframe[(dataframe["Value"] > mean + high_limit) |
+                                      (dataframe["Value"] < mean - low_limit)]
+    except AttributeError:
+        raise ValueError("Mean")
+    return unstable_readings["Value"].size/100.0
+
+
+def calibrate_data(dataframe, calibration_factor):
+    """
+    Calibrates a dataframe by a calibration_factor.
+
+    Calibrates a dataframe with data columns 1-100 and a Datetime column.
+
+    Args:
+        dataframe (pandas dataframe): Pandas dataframe to calibrate.
+        calibration_factor (int):
+
+    Returns:
+        pandas dataframe: Calibrated dataframe.
+    """
+    calibrated_data = dataframe.iloc[:, 1:100 + 1].applymap(lambda x: x * calibration_factor)
+    calibrated_data["Datetime"] = pd.to_datetime(dataframe["Datetime"])
+    calibrated_data = calibrated_data.drop_duplicates()
+    calibrated_data = calibrated_data.reset_index(drop=True)
+    return calibrated_data
+
+
+def flatten_data(dataframe):
+    """
+    Flattens a dataframe.
+
+    Args:
+        dataframe:
+    :return:
+    """
+    flatten_seconds = pd.concat([create_data_from_entry(i, dataframe) for i in range(0, dataframe.shape[0] - 1)])
+    flatten_seconds = flatten_seconds.reset_index(drop=True)
+    return flatten_seconds
+
+
+def average_data(dataframe):
+    """
+    Average pairs of elements in a dataframe.
+
+    Expected schema for the dataframe is:
+        - Datetime: Date and time assoicated to value
+        - Value
+
+    Args:
+        dataframe:
+
+    Returns:
+
+    """
+    def average_pairs(index):
+        return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index - 1, "Value"]])
+
+    number_of_rows = len(dataframe.index)
+    averaged_data = pd.DataFrame(
+        data=[
+            [dataframe.loc[i, "Datetime"], average_pairs(i)]
+            for i in range(1, number_of_rows)
+        ],
+        columns=["Datetime", "Value"]
+    )
+    return averaged_data

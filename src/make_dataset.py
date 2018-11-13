@@ -1,21 +1,26 @@
 import os
 import pandas as pd
-from data_processing import clean_data
+
+from data_processing import clean_camonitored_data
 
 
 if __name__ == "__main__":
 
-    raw_data_path = os.path.abspath("data\\raw")
-    processed_data_path = os.path.abspath("data\\processed")
+    raw_data_path = os.path.abspath(os.path.join("data", "raw"))
+    processed_data_path = os.path.abspath(os.path.join("data", "processed"))
 
-    if os.path.exists(os.path.join(processed_data_path, "cleaned_data.csv")):
-        print("Deleting an old copy")
-        os.remove(os.path.join(processed_data_path, "cleaned_data.csv"))
+    files = os.listdir(raw_data_path)
 
-    print("Reading data from {}".format(raw_data_path))
-    data = pd.read_csv(os.path.join(raw_data_path, "muon_results.csv"), header=None)
+    for filename in files:
 
-    data = clean_data(data)
+        if filename.split(".")[-1] == "txt":
+            print("Reading {} from {}".format(filename, os.path.join(raw_data_path, filename)))
 
-    print("Writing data to {}".format(processed_data_path))
-    data.to_csv(os.path.join(processed_data_path, "cleaned_data.csv"), index=False)
+            data = pd.read_csv(os.path.join(raw_data_path, filename), delim_whitespace=True, header=None)
+            data = clean_camonitored_data(data)
+
+            csv_name = "{}-cleaned.csv".format(filename.split(".")[0])
+            print("Writing {} to {}".format(filename, os.path.join(processed_data_path, csv_name)))
+            data.to_csv(os.path.join(processed_data_path, csv_name), index=False)
+        else:
+            print("Not reading data from {}.".format(filename))
