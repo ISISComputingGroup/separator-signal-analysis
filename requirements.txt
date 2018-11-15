@@ -1,3 +1,7 @@
+# local package
+-e .
+
+# external requirements
 jupyter==1.0.0
 notebook==5.7.0
 altair==2.2.2
@@ -6,3 +10,4 @@ ipython==5.8.0
 vega==1.4.0
 vega-datasets==0.5.0
 numpy==1.13.3+mkl
+matplotlib==2.2.2

@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 
-
 def clean_data(dataframe):
     """
     Sets the columns of the dataframe and removes duplicates
@@ -13,7 +12,8 @@ def clean_data(dataframe):
     Returns:
         dataframe: Dataframe with converted columns and duplicates removed.
     """
-    dataframe = convert_time(dataframe)
+    dataframe["Datetime"] = pd.to_datetime(dataframe[0], unit="s")
+    dataframe = dataframe.drop(0, 1)
     dataframe = dataframe.drop_duplicates(list(range(1, 100 + 1)))
     dataframe = dataframe.reset_index(drop=True)
     return dataframe
@@ -24,7 +24,7 @@ def create_data_from_entry(row_number, raw_dataframe):
     Creates a dataframe with timestamps from a row of data.
 
     Args:
-        row_number (int): Row number to turn into a datafrane
+        row_number (int): Row number to turn into a dataframe
         raw_dataframe (pandas dataframe): The raw dataframe whose rows are to be be converted.
 
     Returns:
@@ -46,54 +46,18 @@ def create_data_from_entry(row_number, raw_dataframe):
     return dataframe
 
 
-def convert_time(dataframe):
-    """
-    Converts the 0 column to a time and sets the index to time.
-
-    Args:
-        dataframe (pandas dataframe): The dataframe to covnert the index to time
-
-    Returns:
-        dataframe: The converted dataframe
-    """
-
-    dataframe["Datetime"] = pd.to_datetime(dataframe[0], unit="s")
-    dataframe = dataframe.drop(0, 1)
-    return dataframe
-
-
-def load_data(nrows=None):
-    """
-    Loads the data and turns the time into timestamps.
-
-    Args:
-        nrows (int, optional): Number of rows to import.
-
-    Returns:
-        data: A pandas dataframe of the import data.
-    """
-    if nrows is not None:
-        data = pd.read_csv("data\\processed\\cleaned_data.csv", nrows=nrows)
-    else:
-        data = pd.read_csv("data\\processed\\cleaned_data.csv")
-
-    data["Time"] = pd.to_datetime(data["Time"])
-
-    return data
-
-
 def create_rolling_averages(row, increment=10):
     """
     Creates an array of rolling averages
     :param row:
     Return:
-        dataframe: Pandas dataframe of rolling averages and time stamp for each
+        averages (list): Row for a pandas dataframe with rolling averages.
     """
 
     averages = []
     averages.append(row["Datetime"])
     row = row.drop("Datetime")
-    for i in range(0, row.size - increment):
+    for i in range(1, row.size - increment):
         averages.append(np.mean([row[i], row[i + increment]]))
 
     return averages
@@ -168,7 +132,8 @@ def flatten_data(dataframe):
 
     Args:
         dataframe:
-    :return:
+    Returns:
+        dataframe:
     """
     flatten_seconds = pd.concat([create_data_from_entry(i, dataframe) for i in range(0, dataframe.shape[0] - 1)])
     flatten_seconds = flatten_seconds.reset_index(drop=True)
@@ -190,13 +155,13 @@ def average_data(dataframe):
 
     """
     def average_pairs(index):
-        return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index - 1, "Value"]])
+        return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index + 1, "Value"]])
 
     number_of_rows = len(dataframe.index)
     averaged_data = pd.DataFrame(
         data=[
             [dataframe.loc[i, "Datetime"], average_pairs(i)]
-            for i in range(1, number_of_rows)
+            for i in range(0, number_of_rows - 1)
         ],
         columns=["Datetime", "Value"]
     )

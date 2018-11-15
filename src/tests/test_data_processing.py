@@ -2,39 +2,8 @@ import datetime
 import unittest
 
 import pandas as pd
-from src.data_processing import clean_data, create_data_from_entry, create_rolling_averages, clean_camonitored_data
+from src.data_processing import create_data_from_entry, create_rolling_averages, clean_camonitored_data, clean_data
 from test_data import SMALL_TEST_DATA, TEST_CAMONITORED_DATA, TEST_ROWS_OF_DATA
-
-
-class CleanDataTests(unittest.TestCase):
-
-    def setUp(self):
-        # Given
-        self.data = pd.DataFrame(
-            data=SMALL_TEST_DATA, columns=list(range(0, 100 + 1))
-        )
-
-        # When:
-        self.result = clean_data(self.data)
-
-    def test_that_GIVEN_data_THEN_the_time_is_converted_to_a_datetime_format(self):
-        # Then:
-        self.assertEquals(self.result["Datetime"].dtype, 'datetime64[ns]')
-
-
-    def test_that_GIVEN_data_there_is_no_0_columns(self):
-        # Then:
-        self.assertTrue(0 not in self.result.columns)
-
-    def test_that_GIVEN_data_THEN_there_are_100_columns(self):
-        # Then:
-        self.assertEquals(len(self.result.columns), 101)
-
-    def test_that_GIVEN_data_set_with_duplicate_rows_THEN_the_returned_dataframe_has_no_duplicate_rows(
-            self):
-        # Then:
-        duplicates = self.result.duplicated()
-        self.assertFalse(any(duplicates))
 
 
 class CreateDataFromEntryTests(unittest.TestCase):
