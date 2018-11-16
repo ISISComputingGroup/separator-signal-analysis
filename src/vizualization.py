@@ -5,7 +5,7 @@ import pandas as pd
 LINE_COLOUR = "#838DB7"
 
 
-def generate_limit_rules(dataframe, column="Value"):
+def generate_stability_rules(dataframe, column="Value"):
     """
     Generates mean and upper and lower stability bounds for visualizations
     using a dataframe.

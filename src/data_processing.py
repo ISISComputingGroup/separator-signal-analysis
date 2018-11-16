@@ -50,7 +50,6 @@ def calibrate_data(dataframe, calibration_factor):
     return calibrated_data
 
 
-
 def clean_camonitored_data(data):
     """
     Cleans file produced from camonitoring a PV.
@@ -89,11 +88,8 @@ def unstable_seconds(dataframe, mean, high_limit=1.0, low_limit=1.0):
     try:
         unstable_readings = dataframe[(dataframe["Value"] > mean + high_limit) |
                                       (dataframe["Value"] < mean - low_limit)]
-    except AttributeError:
-        raise ValueError("Mean")
+
     return unstable_readings["Value"].size/100.0
-
-
 
 
 def flatten_data(dataframe):
