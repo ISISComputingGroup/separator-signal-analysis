@@ -85,10 +85,8 @@ def unstable_seconds(dataframe, mean, high_limit=1.0, low_limit=1.0):
     Returns:
         float: Number of unstable seconds.
     """
-    try:
-        unstable_readings = dataframe[(dataframe["Value"] > mean + high_limit) |
-                                      (dataframe["Value"] < mean - low_limit)]
-
+    unstable_readings = dataframe[(dataframe["Value"] > mean + high_limit) |
+                                  (dataframe["Value"] < mean - low_limit)]
     return unstable_readings["Value"].size/100.0
 
 
