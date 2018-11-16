@@ -1,23 +1,6 @@
 import pandas as pd
 import numpy as np
 
-def clean_data(dataframe):
-    """
-    Sets the columns of the dataframe and removes duplicates
-
-    Args:
-        dataframe: Pandas data frame with columns labeled 0-101.
-            First column is time and next 100 are voltage readings.
-
-    Returns:
-        dataframe: Dataframe with converted columns and duplicates removed.
-    """
-    dataframe["Datetime"] = pd.to_datetime(dataframe[0], unit="s")
-    dataframe = dataframe.drop(0, 1)
-    dataframe = dataframe.drop_duplicates(list(range(1, 100 + 1)))
-    dataframe = dataframe.reset_index(drop=True)
-    return dataframe
-
 
 def create_data_from_entry(row_number, raw_dataframe):
     """
@@ -31,17 +14,17 @@ def create_data_from_entry(row_number, raw_dataframe):
         dataframe: A pandas dataframe whose index is a list of timestamps and whose entries are the values
             of a row.
     """
+    raw_dataframe["Datetime"] = pd.to_datetime(raw_dataframe["Datetime"])
 
     row = raw_dataframe.iloc[row_number]
+
     base_timestamp = row.loc["Datetime"].to_datetime64()
     time_delta = (raw_dataframe.loc[row_number + 1, "Datetime"].to_datetime64()
                   - base_timestamp) / 100
-
     new_time_stamps = [np.datetime64(base_timestamp + i * time_delta) for i in range(0, row.size + 1)]
 
     row = row.drop("Datetime")
-    dataframe = pd.DataFrame(data=zip(new_time_stamps, row.values))
-    dataframe.columns = ["Datetime", "Value"]
+    dataframe = pd.DataFrame(data=zip(new_time_stamps, row.values), columns=["Datetime", "Value"])
     dataframe = dataframe.sort_index(axis=1)
     return dataframe
 

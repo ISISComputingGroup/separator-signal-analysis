@@ -2,11 +2,29 @@ import datetime
 import unittest
 
 import pandas as pd
-from src.data_processing import create_data_from_entry, create_rolling_averages, clean_camonitored_data, clean_data
+from src.data_processing import create_data_from_entry, create_rolling_averages, clean_camonitored_data
 from test_data import SMALL_TEST_DATA, TEST_CAMONITORED_DATA, TEST_ROWS_OF_DATA
 
 
 class CreateDataFromEntryTests(unittest.TestCase):
+
+    @staticmethod
+    def _clean_data(dataframe):
+        """
+        Sets the columns of the dataframe and removes duplicates
+
+        Args:
+            dataframe: Pandas data frame with columns labeled 0-101.
+                First column is time and next 100 are voltage readings.
+
+        Returns:
+            dataframe: Dataframe with converted columns and duplicates removed.
+        """
+        dataframe["Datetime"] = pd.to_datetime(dataframe[0], unit="s")
+        dataframe = dataframe.drop(0, 1)
+        dataframe = dataframe.drop_duplicates(list(range(1, 100 + 1)))
+        dataframe = dataframe.reset_index(drop=True)
+        return dataframe
 
     def test_that_GIVEN_cleaned_data_WHEN_create_data_from_array_is_called_THEN_the_first_entry_has_the_same_time_stamp(
             self):
@@ -14,7 +32,7 @@ class CreateDataFromEntryTests(unittest.TestCase):
         data = pd.DataFrame(
             data=SMALL_TEST_DATA, columns=list(range(0, 100 + 1))
         )
-        data = clean_data(data)
+        data = self._clean_data(data)
 
         # When:
         result = create_data_from_entry(0, data)
@@ -30,7 +48,7 @@ class CreateDataFromEntryTests(unittest.TestCase):
         data = pd.DataFrame(
             data=SMALL_TEST_DATA, columns=list(range(0, 100 + 1))
         )
-        data = clean_data(data)
+        data = self._clean_data(data)
 
         # When:
         result = create_data_from_entry(0, data)
@@ -65,7 +83,7 @@ class CreateDataFromEntryTests(unittest.TestCase):
         data = pd.DataFrame(
             data=SMALL_TEST_DATA, columns=list(range(0, 100 + 1))
         )
-        data = clean_data(data)
+        data = self._clean_data(data)
         data.drop(0, inplace=True)
 
         # When:
