@@ -81,5 +81,8 @@ target/
 # Exclude charts
 /charts
 
+# .json files for charts
+notebooks/*.json
+
 # Mac OS-specific storage files
 .DS_Store

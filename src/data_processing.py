@@ -29,21 +29,26 @@ def create_data_from_entry(row_number, raw_dataframe):
     return dataframe
 
 
-def create_rolling_averages(row, increment=10):
+def calibrate_data(dataframe, calibration_factor):
     """
-    Creates an array of rolling averages
-    :param row:
-    Return:
-        averages (list): Row for a pandas dataframe with rolling averages.
+    Calibrates a dataframe by a calibration_factor.
+
+    Calibrates a dataframe with data columns 1-100 and a Datetime column.
+
+    Args:
+        dataframe (pandas dataframe): Pandas dataframe to calibrate.
+        calibration_factor (int):
+
+    Returns:
+        pandas dataframe: Calibrated dataframe.
     """
 
-    averages = []
-    averages.append(row["Datetime"])
-    row = row.drop("Datetime")
-    for i in range(1, row.size - increment):
-        averages.append(np.mean([row[i], row[i + increment]]))
+    calibrated_data = dataframe.iloc[:, 0:100].applymap(lambda x: x * calibration_factor)
+    calibrated_data["Datetime"] = pd.to_datetime(dataframe["Datetime"])
+    calibrated_data = calibrated_data.drop_duplicates()
+    calibrated_data = calibrated_data.reset_index(drop=True)
+    return calibrated_data
 
-    return averages
 
 
 def clean_camonitored_data(data):
@@ -89,24 +94,6 @@ def unstable_seconds(dataframe, mean, high_limit=1.0, low_limit=1.0):
     return unstable_readings["Value"].size/100.0
 
 
-def calibrate_data(dataframe, calibration_factor):
-    """
-    Calibrates a dataframe by a calibration_factor.
-
-    Calibrates a dataframe with data columns 1-100 and a Datetime column.
-
-    Args:
-        dataframe (pandas dataframe): Pandas dataframe to calibrate.
-        calibration_factor (int):
-
-    Returns:
-        pandas dataframe: Calibrated dataframe.
-    """
-    calibrated_data = dataframe.iloc[:, 1:100 + 1].applymap(lambda x: x * calibration_factor)
-    calibrated_data["Datetime"] = pd.to_datetime(dataframe["Datetime"])
-    calibrated_data = calibrated_data.drop_duplicates()
-    calibrated_data = calibrated_data.reset_index(drop=True)
-    return calibrated_data
 
 
 def flatten_data(dataframe):
