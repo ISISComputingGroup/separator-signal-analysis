@@ -37,13 +37,14 @@ def calibrate_data(dataframe, calibration_factor):
 
     Args:
         dataframe (pandas dataframe): Pandas dataframe to calibrate.
-        calibration_factor (int):
+        calibration_factor (float): The calibration factor.
 
     Returns:
         pandas dataframe: Calibrated dataframe.
     """
 
-    calibrated_data = dataframe.iloc[:, 0:100].applymap(lambda x: x * calibration_factor)
+    calibrated_data = dataframe.loc[:, list(range(1, 100 + 1))]
+    calibrated_data = calibrated_data.applymap(lambda x: x * calibration_factor)
     calibrated_data["Datetime"] = pd.to_datetime(dataframe["Datetime"])
     calibrated_data = calibrated_data.drop_duplicates()
     calibrated_data = calibrated_data.reset_index(drop=True)
@@ -92,13 +93,15 @@ def unstable_seconds(dataframe, mean, high_limit=1.0, low_limit=1.0):
 
 def flatten_data(dataframe):
     """
-    Flattens a dataframe.
+    Flattens a dataframe and creates timestamps at equal distances from each other
 
     Args:
-        dataframe:
+        dataframe: The data frame with rows containing packets of data with a timestamp.
+
     Returns:
-        dataframe:
+        dataframe: A new dataframe with two columns, "Datetime" and "Value" which
     """
+
     flatten_seconds = pd.concat([create_data_from_entry(i, dataframe) for i in range(0, dataframe.shape[0] - 1)])
     flatten_seconds = flatten_seconds.reset_index(drop=True)
     return flatten_seconds
@@ -116,7 +119,7 @@ def average_data(dataframe):
         dataframe:
 
     Returns:
-
+        dataframe of values which were
     """
     def average_pairs(index):
         return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index + 1, "Value"]])

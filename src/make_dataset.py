@@ -1,26 +1,13 @@
 import os
-import pandas as pd
-
-from data_processing import clean_camonitored_data
-
+import shutil
 
 if __name__ == "__main__":
+    project_root = os.getcwd()
+    data_source_directory = os.path.join(r"\\ISIS", "Shares", "ISIS_Experimental_Controls", "muon_fe_separator_data")
+    print(data_source_directory)
+    data_destination_directory = os.path.join(project_root, "data", "raw")
+    print(data_destination_directory)
 
-    raw_data_path = os.path.abspath(os.path.join("data", "raw"))
-    processed_data_path = os.path.abspath(os.path.join("data", "processed"))
-
-    files = os.listdir(raw_data_path)
-
-    for filename in files:
-
-        if filename.split(".")[-1] == "txt":
-            print("Reading {} from {}".format(filename, os.path.join(raw_data_path, filename)))
-
-            data = pd.read_csv(os.path.join(raw_data_path, filename), delim_whitespace=True, header=None)
-            data = clean_camonitored_data(data)
-
-            csv_name = "{}-cleaned.csv".format(filename.split(".")[0])
-            print("Writing {} to {}".format(filename, os.path.join(processed_data_path, csv_name)))
-            data.to_csv(os.path.join(processed_data_path, csv_name), index=False)
-        else:
-            print("Not reading data from {}.".format(filename))
+    for file_name in os.listdir(data_source_directory):
+        shutil.copy(os.path.join(data_source_directory, file_name), data_destination_directory)
+        print("Copied {} from {} to {}".format(file_name, data_source_directory, data_destination_directory))
