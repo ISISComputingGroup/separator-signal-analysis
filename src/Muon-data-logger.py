@@ -4,6 +4,8 @@ import epics
 
 epics.ca.HAS_NUMPY = True
 
+# This script is used to collect values from the DAQ:VOLT:_RAW pv
+# to see what a spark looks like.
 
 with open(r'C:\scripts\muon_results_log.txt', 'a', 0) as f:
     f.write('Logging Data logger errors\n')
@@ -18,4 +20,3 @@ with open(r'C:\scripts\muon_results_log.txt', 'a', 0) as f:
                 time.sleep(0.05)
             except Exception as ex:
                 f.write("Error thrown: " + str(ex) + "\n")
-            
