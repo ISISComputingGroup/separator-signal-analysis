@@ -73,22 +73,23 @@ def clean_camonitored_data(data):
     return cleaned_dataframe
 
 
-def unstable_seconds(dataframe, mean, high_limit=1.0, low_limit=1.0):
+def unstable_seconds(dataframe, mean, high_limit=1.0, low_limit=1.0, sampling_rate=100):
     """
     Finds the number of seconds values are outside a stability range.
 
     Args:
-        dataframe:
+        dataframe: Dateframe to search for unstable values. Expected to have a "Value" column
         mean (float): Mean value.
-        high_limit (float): High limit of stability.
-        low_limit (float): Low limit of stability.
+        high_limit (float, optional): High limit of stability.
+        low_limit (float, optional): Low limit of stability.
+        sampling_rate (float, optional): The number of samples sampled per second.
 
     Returns:
         float: Number of unstable seconds.
     """
     unstable_readings = dataframe[(dataframe["Value"] > mean + high_limit) |
                                   (dataframe["Value"] < mean - low_limit)]
-    return unstable_readings["Value"].size/100.0
+    return float(unstable_readings["Value"].size/sampling_rate)
 
 
 def flatten_data(dataframe):
@@ -107,28 +108,29 @@ def flatten_data(dataframe):
     return flatten_seconds
 
 
-def average_data(dataframe):
+def average_data(dataframe, increment=1):
     """
     Average pairs of elements in a dataframe.
 
     Expected schema for the dataframe is:
-        - Datetime: Date and time assoicated to value
-        - Value
+        - Datetime: Date and time associated to a value.
+        - Value: A value.
 
     Args:
-        dataframe:
+        dataframe: Pandas Dataframe to average
+        increment: Increment between entries to avearge.
 
     Returns:
-        dataframe of values which were
+        Dataframe of averaged values.
     """
     def average_pairs(index):
-        return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index + 1, "Value"]])
+        return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index + increment, "Value"]])
 
     number_of_rows = len(dataframe.index)
     averaged_data = pd.DataFrame(
         data=[
             [dataframe.loc[i, "Datetime"], average_pairs(i)]
-            for i in range(0, number_of_rows - 1)
+            for i in range(0, number_of_rows - increment)
         ],
         columns=["Datetime", "Value"]
     )
