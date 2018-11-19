@@ -171,7 +171,7 @@ class UnstableSeconds(unittest.TestCase):
         )
 
         # When:
-        result = unstable_seconds(data, -1,)
+        result = unstable_seconds(data, -1)
 
         # Then:
         expected = 1.0

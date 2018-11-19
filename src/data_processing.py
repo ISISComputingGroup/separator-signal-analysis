@@ -1,3 +1,4 @@
+from __future__ import division
 import pandas as pd
 import numpy as np
 
@@ -89,7 +90,7 @@ def unstable_seconds(dataframe, mean, high_limit=1.0, low_limit=1.0, sampling_ra
     """
     unstable_readings = dataframe[(dataframe["Value"] > mean + high_limit) |
                                   (dataframe["Value"] < mean - low_limit)]
-    return float(unstable_readings["Value"].size/sampling_rate)
+    return float(unstable_readings["Value"].size / sampling_rate)
 
 
 def flatten_data(dataframe):
