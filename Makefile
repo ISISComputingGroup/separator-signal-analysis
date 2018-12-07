@@ -18,7 +18,7 @@ clean:
 	find . -type d -name "__pycache__" -delete
 	
 ## Download raw data sets
-data: requirements 
+data:  
 	python src\make_dataset.py
 	
 ## Run all tests
