@@ -2,7 +2,7 @@ import altair as alt
 import numpy as np
 import pandas as pd
 
-LINE_COLOUR = "#838DB7"
+LINE_COLOUR = "#7570b3"
 
 
 def generate_stability_rules(dataframe, column="Value"):
@@ -19,8 +19,8 @@ def generate_stability_rules(dataframe, column="Value"):
     """
 
     opacity_level = 0.8
-    mean_rule_color = "#469E74"
-    limits_rule_color = "#D6726B"
+    mean_rule_color = "#1b9e77"
+    limits_rule_color = "#d95f02"
 
     limit_data = pd.DataFrame([{
         'average': np.mean(dataframe.loc[:, column]),

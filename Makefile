@@ -1,4 +1,4 @@
-.PHONY: clean data requirements test
+.PHONY: clean data requirements test help
 
 MAKEFLAGS += --silent
 
@@ -31,8 +31,6 @@ test: requirements
 #################################################################################
 
 .DEFAULT_GOAL := help
-
-.PHONY: help
 
 help:	
 	@echo.
