@@ -12,10 +12,13 @@ requirements:
 	python -m pip install -U pip setuptools wheel
 	python -m pip install -r requirements.txt
 
-## Delete all compiled Python files
-clean: 
-	find . -type f -name "*.py[co]" -delete
-	find . -type d -name "__pycache__" -delete
+## Delete all compiled Python files and altair json files
+clean:
+	@echo off
+	del /S *.pyc
+	del /S *.pyo
+	del /S "__pycache__
+	del /S *.json
 	
 ## Download raw data sets
 data:  
