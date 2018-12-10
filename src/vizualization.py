@@ -7,6 +7,7 @@ LINE_COLOUR = "#7570b3"
 
 def generate_line_chart(x_title="", y_title="", y_scale=(83, 97), time_unit="secondsmilliseconds"):
     """
+    Generates a line chart to visualize the signal.
 
     Args:
         x_title (string, optional): X axis title. Defaults to "".
