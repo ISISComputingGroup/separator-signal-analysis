@@ -2,7 +2,7 @@ import datetime
 import unittest
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
-from src.data_processing import create_data_from_entry, clean_camonitored_data, average_data
+from src.data_processing import create_data_from_entry, clean_camonitored_data, average_data, create_rolling_averages
 
 from src.data_processing import flatten_data, unstable_seconds
 
@@ -98,7 +98,7 @@ class CreateDataFromEntryTests(unittest.TestCase):
         self.assertEquals(expected_value, result_value)
 
 
-class AveragingTests(unittest.TestCase):
+class AveragingAllDataTests(unittest.TestCase):
 
     def test_that_GIVEN_a_row_THEN_an_array_of_rolling_averages_is_produced(self):
         # Given:
@@ -207,4 +207,19 @@ class UnstableSeconds(unittest.TestCase):
 
         # Then:
         expected = 0
+        self.assertEquals(result, expected)
+
+
+class AveragingPacketOfDataTests(unittest.TestCase):
+
+    def test_that_GIVEN_a_row_THEN_an_array_of_rolling_averages_is_produced(self):
+        # Given:
+        timestamp = datetime.datetime.utcnow()
+        row = pd.Series([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, timestamp],
+                        index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "Datetime"])
+
+        # Then:
+        result = create_rolling_averages(row, increment=2)
+        expected = [timestamp, 2, 3, 4, 5, 6, 7, 8, 9]
+
         self.assertEquals(result, expected)

@@ -157,3 +157,19 @@ def time_period(data, end=None, begin=0):
 
     time_delta = data.loc[end, "Datetime"] - data.loc[begin, "Datetime"]
     return time_delta.seconds
+
+
+def create_rolling_averages(row, increment=1):
+    """
+    Creates an array of rolling averages
+
+    Args:
+        row (pandas series): Row of a pandas dataframe.
+        increment (int, optional): Increment of the point
+    Return:
+        averages (list): Row for a pandas dataframe with rolling averages.
+    """
+    values = row.drop("Datetime")
+    averages = [np.mean([values[i], values[i + increment]]) for i in range(0, values.size - increment)]
+    averages.insert(0, row["Datetime"])
+    return averages
