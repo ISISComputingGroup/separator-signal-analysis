@@ -80,7 +80,6 @@ def unstable_seconds(dataframe, high_limit=1.0, low_limit=1.0, sampling_rate=100
 
     Args:
         dataframe: Dateframe to search for unstable values. Expected to have a "Value" column
-        mean (float): Mean value.
         high_limit (float, optional): High limit of stability.
         low_limit (float, optional): Low limit of stability.
         sampling_rate (float, optional): The number of samples sampled per second.
@@ -110,29 +109,27 @@ def flatten_data(dataframe):
     return flatten_seconds
 
 
-def average_data(dataframe, increment=1):
+def dataframe_moving_average_filter(dataframe):
     """
-    Average pairs of elements in a dataframe.
+    Applies a moving average filter of size two to values in a DataFrame.
 
     Expected schema for the dataframe is:
         - Datetime: Date and time associated to a value.
         - Value: A value.
 
     Args:
-        dataframe: Pandas Dataframe to average
-        increment: Increment between entries to avearge.
-
+        dataframe: Pandas DataFrame to filter.
     Returns:
-        Dataframe of averaged values.
+        DataFrame of averaged values.
     """
     def average_pairs(index):
-        return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index + increment, "Value"]])
+        return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index + 1, "Value"]])
 
     number_of_rows = len(dataframe.index)
     averaged_data = pd.DataFrame(
         data=[
             [dataframe.loc[i, "Datetime"], average_pairs(i)]
-            for i in range(0, number_of_rows - increment)
+            for i in range(0, number_of_rows - 1)
         ],
         columns=["Datetime", "Value"]
     )
@@ -159,17 +156,16 @@ def time_period(data, end=None, begin=0):
     return time_delta.seconds
 
 
-def create_rolling_averages(row, increment=1):
+def row_moving_average_filter(row):
     """
-    Creates an array of rolling averages
+    Applies a moving average filter of size 2 to a row in a DataFrame.
 
     Args:
-        row (pandas series): Row of a pandas dataframe.
-        increment (int, optional): Increment of the point
+        row (pandas series): Row of a pandas DataFrame.
     Return:
-        averages (list): Row for a pandas dataframe with rolling averages.
+        data (list): Row for a pandas DataFrame after filtering.
     """
     values = row.drop("Datetime")
-    averages = [np.mean([values[i], values[i + increment]]) for i in range(0, values.size - increment)]
-    averages.insert(0, row["Datetime"])
-    return averages
+    data = [np.mean([values[i], values[i + 1]]) for i in range(0, values.size - 1)]
+    data.insert(0, row["Datetime"])
+    return data
