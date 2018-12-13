@@ -166,6 +166,6 @@ def row_moving_average_filter(row):
         data (list): Row for a pandas DataFrame after filtering.
     """
     values = row.drop("Datetime")
-    data = [np.mean([values[i], values[i + 1]]) for i in range(0, values.size - 1)]
+    data = [np.mean([values.iloc[i], values.iloc[i + 1]]) for i in range(0, values.size - 1)]
     data.insert(0, row["Datetime"])
     return data
