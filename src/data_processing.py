@@ -139,7 +139,7 @@ def average_data(dataframe, increment=1):
     return averaged_data
 
 
-def time_period(data, end=None, begin=0):
+def time_period(data, end=None, begin=0, time_unit="seconds"):
     """
     Calculates the time period between two data entries.
 
@@ -147,7 +147,7 @@ def time_period(data, end=None, begin=0):
         data (pd.Dataframe): data with a "Datetime" column with time stamps.
         end (optional): The row corresponding to the las time stamp. Defaults to last row.
         begin (optional): The row corresponding to the first time stamp. Defaults to first row.
-
+        time_unit (string, optional): The unit to convert the time delta to. Defaults to seconds.
     Returns:
         time_delta: Time delta between the times in seconds.
     """
@@ -156,4 +156,4 @@ def time_period(data, end=None, begin=0):
         end = len(data.index) - 1
 
     time_delta = data.loc[end, "Datetime"] - data.loc[begin, "Datetime"]
-    return time_delta.seconds
+    return getattr(time_delta, time_unit)
