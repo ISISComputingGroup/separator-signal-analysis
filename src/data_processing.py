@@ -74,12 +74,13 @@ def clean_camonitored_data(data):
     return cleaned_dataframe
 
 
-def unstable_seconds(dataframe, high_limit=1.0, low_limit=1.0, sampling_rate=100):
+def unstable_seconds(dataframe, mean=None, high_limit=1.0, low_limit=1.0, sampling_rate=100):
     """
     Finds the number of seconds values are outside a stability range.
 
     Args:
         dataframe: Dateframe to search for unstable values. Expected to have a "Value" column
+        mean (float, optional): Mean value. If not entered, calculates the mean of the data set.
         high_limit (float, optional): High limit of stability.
         low_limit (float, optional): Low limit of stability.
         sampling_rate (float, optional): The number of samples sampled per second.
@@ -87,9 +88,11 @@ def unstable_seconds(dataframe, high_limit=1.0, low_limit=1.0, sampling_rate=100
     Returns:
         float: Number of unstable seconds.
     """
-    mean = np.mean(dataframe["Value"])
+    if mean is None:
+        mean = np.mean(dataframe["Value"])
     unstable_readings = dataframe[(dataframe["Value"] > mean + high_limit) |
                                   (dataframe["Value"] < mean - low_limit)]
+
     return float(unstable_readings["Value"].size / sampling_rate)
 
 
@@ -136,7 +139,7 @@ def dataframe_moving_average_filter(dataframe):
     return averaged_data
 
 
-def time_period(data, end=None, begin=0):
+def time_period(data, end=None, begin=0, time_unit="seconds"):
     """
     Calculates the time period between two data entries.
 
@@ -144,7 +147,7 @@ def time_period(data, end=None, begin=0):
         data (pd.Dataframe): data with a "Datetime" column with time stamps.
         end (optional): The row corresponding to the las time stamp. Defaults to last row.
         begin (optional): The row corresponding to the first time stamp. Defaults to first row.
-
+        time_unit (string, optional): The unit to convert the time delta to. Defaults to seconds.
     Returns:
         time_delta: Time delta between the times in seconds.
     """
@@ -153,7 +156,7 @@ def time_period(data, end=None, begin=0):
         end = len(data.index) - 1
 
     time_delta = data.loc[end, "Datetime"] - data.loc[begin, "Datetime"]
-    return time_delta.seconds
+    return getattr(time_delta, time_unit)
 
 
 def row_moving_average_filter(row):
