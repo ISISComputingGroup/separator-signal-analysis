@@ -74,13 +74,13 @@ def clean_camonitored_data(data):
     return cleaned_dataframe
 
 
-def unstable_seconds(dataframe, high_limit=1.0, low_limit=1.0, sampling_rate=100):
+def unstable_seconds(dataframe, mean=None, high_limit=1.0, low_limit=1.0, sampling_rate=100):
     """
     Finds the number of seconds values are outside a stability range.
 
     Args:
         dataframe: Dateframe to search for unstable values. Expected to have a "Value" column
-        mean (float): Mean value.
+        mean (float, optional): Mean value. If not entered, calculates the mean of the data set.
         high_limit (float, optional): High limit of stability.
         low_limit (float, optional): Low limit of stability.
         sampling_rate (float, optional): The number of samples sampled per second.
@@ -88,9 +88,11 @@ def unstable_seconds(dataframe, high_limit=1.0, low_limit=1.0, sampling_rate=100
     Returns:
         float: Number of unstable seconds.
     """
-    mean = np.mean(dataframe["Value"])
+    if mean is None:
+        mean = np.mean(dataframe["Value"])
     unstable_readings = dataframe[(dataframe["Value"] > mean + high_limit) |
                                   (dataframe["Value"] < mean - low_limit)]
+
     return float(unstable_readings["Value"].size / sampling_rate)
 
 
