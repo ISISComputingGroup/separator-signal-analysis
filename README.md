@@ -12,12 +12,13 @@ found in the make file. To find out what commands are available, run `make` or `
 
 To set up the repository so you can view the analysis/start a new analysis after 
 cloning the git repository:
-1. First run `make requirements` to install the extrapython packages used. 
-2. Next run `make data` to get the raw data from the share. You should treat the raw data as
-being immutable.
-3. Run `make notebooks` to start the Jupyter notebook server. It will open a web browser 
-from which to navigate the directory structure  and view Jupyter notebooks in the 
-`notebooks` folder.
+1. First run `make requirements` in an EPICS terminal to install the extra 
+python packages used.
+2. Next run `make data` in an EPICS terminal to get the raw data from the 
+share. You should treat the raw data as being immutable.
+3. Run `make notebooks` in an EPICS terminal to start the Jupyter notebook server. 
+It will open a web browser from which to navigate the directory structure 
+and view Jupyter notebooks in the `notebooks` folder.
 
 ### Commands
 
@@ -27,15 +28,25 @@ Call `make data` in an EPICS terminal.
 
 #### To install the required python packages.
 
-Call `make requirements` in an EPICS terminal..
+Call `make requirements` in an EPICS terminal.
 
-####To run the unit tests
+#### Delete complied python files and extra json files
 
-Call `make test` in an EPICS terminal..
+Call `make clean` in an EPICS terminal.
+
+#### To run the unit tests
+
+Call `make test` in an EPICS terminal.
+
+#### To start the notebook server
+
+Call `make notebook` in an EPICS terminal to start the notebook server. 
+`CTRL + C` in the window running the server will stop the server.
 
 #### To get help on what commands you can use
 
-Call `make` or `make help` in an EPICS terminal..
+Call `make` or `make help` in an EPICS terminal.
+
 
 ## Data Analysis
 
@@ -43,7 +54,7 @@ Call `make` or `make help` in an EPICS terminal..
 
 The main libraries used to perform the data analysis are:
 
-- **pandas**: Used for importing, cleaning and manipulating data. 
+- **Pandas**: Used for importing, cleaning and manipulating data. 
 [Docs](http://pandas.pydata.org/pandas-docs/stable/) and a 
 [tutorial](http://pandas.pydata.org/pandas-docs/stable/10min.html)).
 - **Jupyter**: Used to create interactive notebooks detailing the analysis (https://jupyter.org/). 
