@@ -46,5 +46,6 @@ help:
 	@echo data				Download raw data sets.
 	@echo requirements			Install the requirements.
 	@echo test				Run all tests.	
+	@echo notebooks			Start the Jupyter notebooks server running.	
 	@echo.
 	
