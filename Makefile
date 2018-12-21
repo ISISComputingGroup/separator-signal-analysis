@@ -29,7 +29,7 @@ test: requirements
 	python -m unittest discover -s src/tests -p "test_*.py"
 	
 ## Starts up notebook server
-notebook: requirements
+notebooks: requirements
 	python -m notebook
 
 #################################################################################

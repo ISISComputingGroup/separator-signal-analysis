@@ -18,3 +18,7 @@ Run the command `make requirements`.
 ### To run the unit tests
 
 Run the command `make test`.
+
+## To start the notebook server
+
+Run the command `make notebooks` to start up the Jupyter notebook server.
