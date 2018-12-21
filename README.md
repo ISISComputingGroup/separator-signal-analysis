@@ -7,6 +7,8 @@ Analysis of the signal from the separator PSU.
 Command to setup the environment to repeat the data analysis can be found in the make file.
 To find out what commands are available, run `make`.
 
+**N.B.:** You need to be in a EPICS terminal for these commands to work.
+
 ### To Get the raw data
 
 Run the command `make data`.
