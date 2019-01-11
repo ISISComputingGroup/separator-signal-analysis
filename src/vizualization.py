@@ -31,15 +31,18 @@ def generate_line_chart(x_title="", y_title="", y_scale=(83, 97), time_unit="sec
     return base
 
 
-def generate_stability_rules(dataframe, column="Value"):
+def generate_stability_rules(dataframe, column="Value", mean=None, low_limit=-1, high_limit=+1):
     """
-    Generates mean and upper and lower stability bounds for visualizations
+    Generates mean, upper and lower stability bounds for visualizations
     using a dataframe.
 
     Args:
         dataframe (dataframe): Pandas dataframe to get the mean from
         column (string, optional): Column to calculate the mean from.
             Default to "Value".
+        mean (float, optional):
+        low_limit (float, optional): Low limit of stability around the mean. Defaults to -1.
+        high_limit (float, optional): High limit of stability around the mean. Defaults to 1.
     Returns:
         altair layer chart with horizontal lines for mean, lower  stability limit and upper stability limit.
     """
@@ -49,9 +52,9 @@ def generate_stability_rules(dataframe, column="Value"):
     limits_rule_color = "#d95f02"
 
     limit_data = pd.DataFrame([{
-        'average': np.mean(dataframe.loc[:, column]),
-        'low_limit': np.mean(dataframe.loc[:, column]) - 1,
-        'high_limit': np.mean(dataframe.loc[:, column]) + 1
+        'average': mean if mean is not None else np.mean(dataframe.loc[:, column]),
+        'low_limit': np.mean(dataframe.loc[:, column]) + low_limit,
+        'high_limit': np.mean(dataframe.loc[:, column]) + high_limit
     }])
 
     mean = alt.Chart().mark_rule(color=mean_rule_color, opacity=opacity_level).encode(
