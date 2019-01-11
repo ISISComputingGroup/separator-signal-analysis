@@ -1,4 +1,4 @@
-.PHONY: clean data requirements test help
+.PHONY: clean data requirements test help notebooks
 
 MAKEFLAGS += --silent
 
@@ -28,6 +28,7 @@ data:
 test: requirements
 	python -m unittest discover -s src/tests -p "test_*.py"
 	
+
 ## Starts up notebook server
 notebooks: requirements
 	python -m notebook
