@@ -112,29 +112,27 @@ def flatten_data(dataframe):
     return flatten_seconds
 
 
-def average_data(dataframe, increment=1):
+def dataframe_moving_average_filter(dataframe):
     """
-    Average pairs of elements in a dataframe.
+    Applies a moving average filter of size two to values in a DataFrame.
 
     Expected schema for the dataframe is:
         - Datetime: Date and time associated to a value.
         - Value: A value.
 
     Args:
-        dataframe: Pandas Dataframe to average
-        increment: Increment between entries to avearge.
-
+        dataframe: Pandas DataFrame to filter.
     Returns:
-        Dataframe of averaged values.
+        DataFrame of averaged values.
     """
     def average_pairs(index):
-        return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index + increment, "Value"]])
+        return np.mean([dataframe.loc[index, "Value"], dataframe.loc[index + 1, "Value"]])
 
     number_of_rows = len(dataframe.index)
     averaged_data = pd.DataFrame(
         data=[
             [dataframe.loc[i, "Datetime"], average_pairs(i)]
-            for i in range(0, number_of_rows - increment)
+            for i in range(0, number_of_rows - 1)
         ],
         columns=["Datetime", "Value"]
     )
@@ -159,3 +157,18 @@ def time_period(data, end=None, begin=0, time_unit="seconds"):
 
     time_delta = data.loc[end, "Datetime"] - data.loc[begin, "Datetime"]
     return getattr(time_delta, time_unit)
+
+
+def row_moving_average_filter(row):
+    """
+    Applies a moving average filter of size 2 to a row in a DataFrame.
+
+    Args:
+        row (pandas series): Row of a pandas DataFrame.
+    Return:
+        data (list): Row for a pandas DataFrame after filtering.
+    """
+    values = row.drop("Datetime")
+    data = [np.mean([values[i], values[i + 1]]) for i in range(0, values.size - 1)]
+    data.insert(0, row["Datetime"])
+    return data
