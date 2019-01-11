@@ -2,7 +2,8 @@ import datetime
 import unittest
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
-from src.data_processing import create_data_from_entry, clean_camonitored_data, average_data
+from src.data_processing import create_data_from_entry, clean_camonitored_data
+from src.data_processing import dataframe_moving_average_filter, row_moving_average_filter
 
 from src.data_processing import flatten_data, unstable_seconds
 
@@ -98,7 +99,7 @@ class CreateDataFromEntryTests(unittest.TestCase):
         self.assertEquals(expected_value, result_value)
 
 
-class AveragingTests(unittest.TestCase):
+class DataFrameFilteringTests(unittest.TestCase):
 
     def test_that_GIVEN_a_row_THEN_an_array_of_rolling_averages_is_produced(self):
         # Given:
@@ -109,11 +110,11 @@ class AveragingTests(unittest.TestCase):
         )
 
         # When:
-        result = average_data(data, increment=2)
+        result = dataframe_moving_average_filter(data)
 
         # Then:
         expected = pd.DataFrame(
-            data=[[timestamp, float(i)] for i in range(2, 10)],
+            data=[[timestamp, i-0.5] for i in range(2, 11)],
             columns=["Datetime", "Value"]
         )
         assert_frame_equal(result, expected)
@@ -207,4 +208,19 @@ class UnstableSeconds(unittest.TestCase):
 
         # Then:
         expected = 0
+        self.assertEquals(result, expected)
+
+
+class AveragingPacketOfDataTests(unittest.TestCase):
+
+    def test_that_GIVEN_a_row_THEN_an_array_of_rolling_averages_is_produced(self):
+        # Given:
+        timestamp = datetime.datetime.utcnow()
+        row = pd.Series([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, timestamp],
+                        index=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, "Datetime"])
+
+        # Then:
+        result = row_moving_average_filter(row)
+        expected = [timestamp, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]
+
         self.assertEquals(result, expected)
