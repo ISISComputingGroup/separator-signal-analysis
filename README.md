@@ -18,3 +18,7 @@ Run the command `make requirements`.
 ### To run the unit tests
 
 Run the command `make test`.
+
+### RUN the notebook
+
+Run `c:\Instrument\Apps\Python\Scripts\jupyter-notebook.exe`
